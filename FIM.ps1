@@ -3,7 +3,7 @@
 Write-Host ""
 Write-Host "What would you like to do?"
 Write-Host "A) Collect new Baseline?"
-Write-Host "B) Begin moniotring files with saved Baseline?"
+Write-Host "B) Begin monitoring files with saved Baseline?"
 
 $response = Read-Host -Prompt "Please enter 'A' or 'B'"
 
@@ -47,15 +47,43 @@ elseif ($response -eq "B".ToUpper()){
         $fileHashDictionary.add($f.Split("|")[0],$f.Split("|")[1])
         
     }
-    $fileHashDictionary.Keys
+    while($true){
+        Start-Sleep -Seconds 1
+        
+        
+        $files = Get-ChildItem -Path .\'important files'
+        #For file, calculate the hash, and write to baseline.txt
+        foreach($f in $files){ 
+            $hash = Calculate-File-Hash $f.FullName
 
+            #notify if a new file has been created 
+            if($fileHashDictionary[$hash.Path] -eq $null){
+                #A new file has been created
+                Write-Host "$($hash.Path) has been created"
+            }
+            # Notify if a new file has been changed
+            if($fileHashDictionary[$hash.Path] -eq $hash.Hash){
 
+            }
+            else{
+                Write-Host "$($hash.Path) has changed!"
+            }
+
+        }
+    
+
+        foreach($key in $fileHashDictionary.Keys){
+            $baselineFileStillExists = Test-Path -Path $key
+            if(-Not $baselineFileStillExists){
+               Write-Host "$($key) has been deleted!" 
+
+            }
+
+        }
+
+    }
 
     $fileHashDictionary.add("path","hash")
     $fileHashDictionary
     $fileHashDictionary["path"]
-    
-    #Begin monitoring files with saved baseline
-
-
 }
